@@ -3,9 +3,15 @@
  */
 package twitter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+
 
 /**
  * SocialNetwork provides methods that operate on a social network.
@@ -41,7 +47,18 @@ public class SocialNetwork {
      *         either authors or @-mentions in the list of tweets.
      */
     public static Map<String, Set<String>> guessFollowsGraph(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
+        TreeMap<String, Set<String>> socialNetworkMap = new TreeMap<String, Set<String>>();
+        for (Tweet tweet : tweets) {
+        	String authorString = tweet.getAuthor().toLowerCase();
+        	ArrayList<String> methonedUsernameArrayList = Extract.getMentionedUsernames(tweet.getText());
+        	if (socialNetworkMap.containsKey(authorString)) {
+        		socialNetworkMap.get(authorString).addAll(methonedUsernameArrayList);
+        	} else {
+                HashSet<String> set = new HashSet<String>(methonedUsernameArrayList);
+        		socialNetworkMap.put(authorString, set);
+        	}
+        }
+        return socialNetworkMap;
     }
 
     /**
@@ -54,7 +71,21 @@ public class SocialNetwork {
      *         descending order of follower count.
      */
     public static List<String> influencers(Map<String, Set<String>> followsGraph) {
-        throw new RuntimeException("not implemented");
+    	List<Map.Entry<String, Set<String>>> list =
+    	        new ArrayList<>(followsGraph.entrySet());
+
+    	Collections.sort(list, new Comparator<Map.Entry<String, Set<String>>>() {
+    	    public int compare(Map.Entry<String, Set<String>> o1, Map.Entry<String, Set<String>> o2) {
+    	        return o1.getValue().size() - o2.getValue().size();
+    	    }
+    	});
+
+    	List<String> sortedKeys = new ArrayList<>();
+    	for (Map.Entry<String, Set<String>> entry : list) {
+    	    sortedKeys.add(entry.getKey());
+    	}
+    	
+    	return sortedKeys;
     }
 
 }
